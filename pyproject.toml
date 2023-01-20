@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "image_tiles"
+version = "0.1.0"
+authors = [
+    {name = "Nate Harada", email = "image_tiles@moonshinelabs.ai"},
+]
+description = "Serve a webpage with images from a folder."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+keywords = ["image", "tiles", "visualize"]
+license = {text = "MIT"}
+dependencies = [
+    "flask==2.2.2",
+    "numpy==1.24.1",
+    "loguru==0.6.0",
+    "imageio==2.24.0",
+    "boto3",
+    "smart_open[aws]",
+    "tifffile",
+]
+
+[project.urls]
+Homepage = "https://github.com/moonshinelabs/image_tiles"
+
+[project.scripts]
+image_tiles = "image_tiles:main"

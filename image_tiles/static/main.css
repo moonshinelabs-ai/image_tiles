@@ -1,0 +1,25 @@
+body {
+    max-width: 80%;
+    margin: 30 auto;
+    font-family: Sans-Serif;
+    background: #DDDDDD;
+}
+ul {
+    font-size: 0;
+    list-style: none;
+    width: 100%;
+    padding-left: 0px;
+}
+ul li {
+    display: inline-block;
+    width: 24.0%;
+    margin: 5px;
+}
+ul li:hover {
+    opacity: 50%;
+}
+ul li img {
+    opacity: 100%;
+    width: 100%;
+    background: #959595;
+}

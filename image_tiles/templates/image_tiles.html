@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>Image Tiles -- {{ folder_location }}</title>
+        <link rel="stylesheet" href="static/main.css">
+    </head>
+    <body>
+        <h1>Image Tiles</h1>
+        <p>Folder Location: {{ folder_location }}</p>
+        <p>Number of Images: {{ num_images }}</p>
+        <p>Items per Row: <input name="items_per" type="text" value=4 oninput="set_items_per_row(this.value)"></input></p>
+
+        <ul>
+        {% for item in items %}
+            <li><a  href="{{item}}"><img src="{{item}}" /></a></li>
+        {% endfor %}
+        </ul>
+
+        <script src="static/main.js"></script>
+    </body>
+</html>

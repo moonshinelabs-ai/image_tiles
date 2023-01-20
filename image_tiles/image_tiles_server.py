@@ -1,0 +1,142 @@
+import argparse
+import io
+import os
+import random
+from typing import Optional, Sequence
+
+import flask
+import imageio.v3 as imageio
+import numpy as np
+from loguru import logger
+
+from .file_exists import exists
+from .glob import glob
+from .image import get_supported_extensions, read_image
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Simple server visualizes images in a folder."
+    )
+    parser.add_argument("folder_path", help="Which folder to serve.")
+    parser.add_argument("--bind", help="Which address to bind to.", default="0.0.0.0")
+    parser.add_argument("--port", help="Port to bind on.", type=int, default=6006)
+    parser.add_argument(
+        "--debug", help="Enable server debugging", type=bool, default=True
+    )
+    parser.add_argument(
+        "--root",
+        help="Root directory to serve templates/static from",
+        type=str,
+        default="",
+    )
+    parser.add_argument(
+        "--num_items_default", help="Show this many images", type=int, default=100
+    )
+
+    args = parser.parse_args()
+
+    # Do some surgery for relative paths
+    if not args.folder_path.startswith("/"):
+        if "s3://" not in args.folder_path and "gs://" not in args.folder_path:
+            args.folder_path = os.path.join(os.getcwd(), args.folder_path)
+
+    return args
+
+
+args = parse_args()
+root = os.path.join(os.getcwd(), args.root) if args.root else ""
+app = flask.Flask(
+    __name__,
+    template_folder=os.path.join(root, "templates"),
+    static_folder=os.path.join(root, "static"),
+)
+
+
+def get_image_files(folder: str) -> list[str]:
+    """Get a list of supported image files in a folder."""
+    supported_extensions = get_supported_extensions()
+
+    # We grab the filelist once and then test if a file is valid. This
+    # costs more memory but the cost of a large glob in the cloud is high.
+    path = os.path.join(folder, f"*")
+    logger.info("Globbing files, this may take a while for a large AWS/GCP bucket...")
+    filelist = glob(path)
+
+    imagelist = []
+    for f in filelist:
+        ext = "." + f.split(".")[-1]
+        if ext in supported_extensions:
+            imagelist.append(f)
+
+    logger.info(f"Got {len(imagelist)} items from {folder}.")
+    return imagelist
+
+
+def read_and_render_image(path: str) -> Optional[bytes]:
+    """Reads an image and converts it to a png for display in the web
+    browser."""
+    # Rewrite based on the input
+    if path.startswith("/s3"):
+        path = path.replace("/s3/", "s3://")
+    elif path.startswith("/gs"):
+        path = path.replace("/gs/", "gs://")
+
+    if not exists(path):
+        return None
+
+    array = read_image(path, normalize=None, render_method="rgb")
+
+    with io.BytesIO() as f:
+        imageio.imwrite(uri=f, image=array, extension=".png")  # type: ignore
+        return f.getvalue()
+
+
+def server_path(ext_path: str) -> str:
+    """Convert an external path to one we can use internally."""
+    if "s3://" in ext_path:
+        return f"images/s3/{ext_path[5:]}"
+    elif "gs://" in ext_path:
+        return f"images/{ext_path[3:]}"
+    else:
+        return f"images/{ext_path[1:]}"
+
+
+@app.route("/images/<path:image_path>")
+def image(image_path):
+    full_path = f"/{image_path}"
+    data = read_and_render_image(full_path)
+
+    return flask.Response(data, mimetype="image/png")
+
+
+@app.route("/")
+def index():
+    url_args = flask.request.args
+
+    num_items = args.num_items_default
+    if "num_items" in url_args:
+        num_items = int(url_args["num_items"])
+
+    logger.info(f"Reading from folder {args.folder_path}")
+    filelist = get_image_files(args.folder_path)
+    random.shuffle(filelist)
+    filelist = filelist[0:num_items]
+    items = [server_path(f) for f in filelist]
+    logger.info(f"Request recieved, found {len(filelist)} items to display")
+
+    return flask.render_template(
+        "image_tiles.html",
+        folder_location=args.folder_path,
+        num_images=num_items,
+        items=items,
+    )
+
+
+def main():
+    logger.info("Starting server on http://%s:%s" % (args.bind, args.port))
+    app.run(host=args.bind, port=args.port, debug=args.debug, use_reloader=False)
+
+
+if __name__ == "__main__":
+    main()
