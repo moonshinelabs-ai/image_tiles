@@ -1,7 +1,11 @@
 import os
 from multiprocessing.connection import Client
 
-from botocore.exceptions import ClientError  # pants: no-infer-dep
+try:
+    from botocore.exceptions import ClientError  # pants: no-infer-dep
+except ImportError:
+    pass
+
 from smart_open import open
 
 from .glob import glob

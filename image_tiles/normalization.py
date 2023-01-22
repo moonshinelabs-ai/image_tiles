@@ -52,6 +52,47 @@ def _get_format_fx(
     return apply_fx, revert_fx
 
 
+def standard_normalization(image: np.ndarray) -> np.ndarray:
+    """If the image is a standard format, leave it alone. Otherwise apply
+    scaling norm.
+
+    Args:
+        image: An input image to normalize, any scale and format
+
+    Returns:
+        scaled: An image in uint8 format.
+    """
+    _, _, c = image.shape
+    if c in [1, 3, 4]:
+        if image.dtype in [np.float32, np.uint8]:
+            return image
+
+    return scaling_normalization(image)
+
+
+def scaling_normalization(image: np.ndarray) -> np.ndarray:
+    """Normalize an image by scaling to uint8.
+
+    This function will clip numbers under 0 and scale postive numbers.
+
+    Args:
+        image: An input image to normalize, any scale and format
+
+    Returns:
+        scaled: An image in uint8 format.
+    """
+    # Convert to float for scaling
+    image = image.astype(float)
+    # Clip negative numbers, but leave small positive numbers alone.
+    image[image <= 0] = 0
+    # Scale from 0 to 1
+    image /= np.max(image)
+    # Scale from 0 to 255
+    image *= 255
+
+    return image.astype(np.uint8)
+
+
 def sigmoid_normalization(
     image: np.ndarray,
     c: float = 10.0,

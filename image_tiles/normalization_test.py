@@ -4,7 +4,37 @@ import numpy as np
 from parameterized import parameterized
 
 from .normalization import (invert_mean_std_normalization,
-                            sentinel_truecolor_image, sigmoid_normalization)
+                            scaling_normalization, sentinel_truecolor_image,
+                            sigmoid_normalization, standard_normalization)
+
+
+class TestScalingNormalization(unittest.TestCase):
+    def test_scaling_image(self):
+        test_array = np.arange(16 * 16 * 3).reshape((16, 16, 3))
+
+        normed = scaling_normalization(test_array)
+        self.assertAlmostEqual(normed.sum(), 97537)
+        self.assertTrue(normed.max(), 255)
+        self.assertEqual(normed.dtype, np.uint8)
+
+
+class TestStandardNormalization(unittest.TestCase):
+    def test_good_image(self):
+        test_array = np.ones(16 * 16 * 3).reshape((16, 16, 3))
+        test_array = test_array.astype(float)
+
+        normed = standard_normalization(test_array)
+        self.assertAlmostEqual(normed.sum(), 16 * 16 * 3 * 255)
+        self.assertTrue(normed.max(), 255)
+        self.assertEqual(normed.dtype, np.uint8)
+
+    def test_bad_image(self):
+        test_array = np.arange(16 * 16 * 3).reshape((16, 16, 3))
+
+        normed = standard_normalization(test_array)
+        self.assertAlmostEqual(normed.sum(), 97537)
+        self.assertTrue(normed.max(), 255)
+        self.assertEqual(normed.dtype, np.uint8)
 
 
 class TestSentinelTrueColor(unittest.TestCase):

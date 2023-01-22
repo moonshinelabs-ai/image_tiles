@@ -20,9 +20,21 @@ def parse_args():
     )
     parser.add_argument("folder_path", help="Which folder to serve.")
     parser.add_argument("--bind", help="Which address to bind to.", default="0.0.0.0")
-    parser.add_argument("--port", help="Port to bind on.", type=int, default=6006)
+    parser.add_argument("--port", help="Port to bind on.", type=int, default=8000)
     parser.add_argument(
-        "--debug", help="Enable server debugging", type=bool, default=True
+        "--render_method",
+        default="rgb",
+        nargs="?",
+        choices=["rgb", "bgr", "bw", "sentinel"],
+    )
+    parser.add_argument(
+        "--normalization",
+        default="standard",
+        nargs="?",
+        choices=["standard", "scaling", "sigmoid", "sentinel"],
+    )
+    parser.add_argument(
+        "--debug", help="Enable server debugging", type=bool, default=False
     )
     parser.add_argument(
         "--root",
@@ -31,7 +43,7 @@ def parse_args():
         default="",
     )
     parser.add_argument(
-        "--num_items_default", help="Show this many images", type=int, default=100
+        "--num_items", help="Show this many images", type=int, default=100
     )
 
     args = parser.parse_args()
@@ -85,7 +97,9 @@ def read_and_render_image(path: str) -> Optional[bytes]:
     if not exists(path):
         return None
 
-    array = read_image(path, normalize=None, render_method="rgb")
+    array = read_image(
+        path, normalize=args.normalization, render_method=args.render_method
+    )
 
     with io.BytesIO() as f:
         imageio.imwrite(uri=f, image=array, extension=".png")  # type: ignore
@@ -114,7 +128,7 @@ def image(image_path):
 def index():
     url_args = flask.request.args
 
-    num_items = args.num_items_default
+    num_items = args.num_items
     if "num_items" in url_args:
         num_items = int(url_args["num_items"])
 
@@ -130,6 +144,8 @@ def index():
         folder_location=args.folder_path,
         num_images=num_items,
         items=items,
+        normalization=args.normalization,
+        render_method=args.render_method,
     )
 
 
