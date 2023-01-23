@@ -13,7 +13,11 @@ A simple but flexible tool to view a folder full of images on your web browser. 
 
 ## Installation
 ```
+# Install default installation
 $ pip install image_tiles
+
+# Install with S3 support
+$ pip install image_tiles[aws]
 ```
 
 ## Usage

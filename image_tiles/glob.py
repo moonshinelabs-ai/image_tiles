@@ -3,10 +3,7 @@ import glob as sys_glob
 import os
 from typing import Sequence
 
-try:
-    import boto3
-except ImportError:
-    pass
+from loguru import logger
 
 
 def _filter_sequences(pattern: str, search_list: Sequence) -> list:
@@ -20,6 +17,14 @@ def _filter_sequences(pattern: str, search_list: Sequence) -> list:
 
 def _aws_glob(path: str) -> list:
     """Implementation of AWS glob."""
+    try:
+        import boto3
+    except ImportError:
+        logger.error(
+            "Didn't find AWS dependencies, try installing image_tiles[aws] if you haven't already."
+        )
+        return []
+
     # Do a bunch of surgery on the path to get the components
     full_path, _ = os.path.split(path)
     _, _, bucket, *remaining = full_path.split("/")

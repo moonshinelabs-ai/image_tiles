@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "image_tiles"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     {name = "Nate Harada", email = "image_tiles@moonshinelabs.ai"},
 ]
@@ -22,10 +22,15 @@ dependencies = [
     "numpy==1.24.1",
     "loguru==0.6.0",
     "imageio==2.24.0",
-    "boto3",
-    "smart_open[aws]",
-    "tifffile",
+    "tifffile==2022.10.10",
+    "smart_open==6.3.0",
 ]
+[project.optional-dependencies]
+aws = [
+    "boto3==1.26.54",
+    "smart_open[aws]==6.3.0",
+]
+
 
 [project.urls]
 Homepage = "https://github.com/moonshinelabs/image_tiles"

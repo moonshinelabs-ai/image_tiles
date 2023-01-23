@@ -1,11 +1,7 @@
 import os
 from multiprocessing.connection import Client
 
-try:
-    from botocore.exceptions import ClientError  # pants: no-infer-dep
-except ImportError:
-    pass
-
+from loguru import logger
 from smart_open import open
 
 from .glob import glob
@@ -13,6 +9,14 @@ from .glob import glob
 
 def _aws_exists(path: str) -> bool:
     """Test if an AWS file exists."""
+    try:
+        from botocore.exceptions import ClientError  # pants: no-infer-dep
+    except ImportError:
+        logger.error(
+            "Didn't find AWS dependencies, try installing image_tiles[aws] if you haven't already."
+        )
+        return False
+
     file_exists = False
 
     # Check for individual files.
