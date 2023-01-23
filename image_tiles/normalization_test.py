@@ -3,9 +3,13 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
-from .normalization import (invert_mean_std_normalization,
-                            scaling_normalization, sentinel_truecolor_image,
-                            sigmoid_normalization, standard_normalization)
+from .normalization import (
+    invert_mean_std_normalization,
+    scaling_normalization,
+    sentinel_truecolor_image,
+    sigmoid_normalization,
+    standard_normalization,
+)
 
 
 class TestScalingNormalization(unittest.TestCase):

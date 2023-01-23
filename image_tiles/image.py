@@ -9,8 +9,12 @@ from loguru import logger
 from PIL import Image
 from smart_open import open
 
-from .normalization import (scaling_normalization, sentinel_truecolor_image,
-                            sigmoid_normalization, standard_normalization)
+from .normalization import (
+    scaling_normalization,
+    sentinel_truecolor_image,
+    sigmoid_normalization,
+    standard_normalization,
+)
 
 
 def _render_image_data(data: np.ndarray, render_method: str) -> np.ndarray:

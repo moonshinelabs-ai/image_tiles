@@ -37,3 +37,6 @@ Homepage = "https://github.com/moonshinelabs/image_tiles"
 
 [project.scripts]
 image_tiles = "image_tiles:main"
+
+[tool.isort]
+profile = "black"
