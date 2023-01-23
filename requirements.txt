@@ -7,3 +7,4 @@ smart_open==6.3.0
 boto3==1.26.54
 smart_open[aws]==6.3.0
 moto[s3]==4.1
+parameterized==0.8.1
