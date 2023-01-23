@@ -1,0 +1,9 @@
+flask==2.2.2
+numpy==1.24.1
+loguru==0.6.0
+imageio==2.24.0
+tifffile==2022.10.10
+smart_open==6.3.0
+boto3==1.26.54
+smart_open[aws]==6.3.0
+moto[s3]==4.1
