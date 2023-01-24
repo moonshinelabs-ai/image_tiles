@@ -2,11 +2,10 @@ import argparse
 import io
 import os
 import random
-from typing import Optional, Sequence
+from typing import Optional
 
 import flask
 import imageio.v3 as imageio
-import numpy as np
 from loguru import logger
 
 from .file_exists import exists
@@ -19,31 +18,37 @@ def parse_args():
         description="Simple server visualizes images in a folder."
     )
     parser.add_argument("folder_path", help="Which folder to serve.")
-    parser.add_argument("--bind", help="Which address to bind to.", default="0.0.0.0")
+    parser.add_argument(
+        "--bind",
+        help="Which address to bind to, 0.0.0.0 will bind to all IPs.",
+        default="0.0.0.0",
+    )
     parser.add_argument("--port", help="Port to bind on.", type=int, default=8000)
     parser.add_argument(
         "--render_method",
         default="rgb",
         nargs="?",
         choices=["rgb", "bgr", "bw", "sentinel"],
+        help="Rendering method, see README for details.",
     )
     parser.add_argument(
         "--normalization",
         default="standard",
         nargs="?",
         choices=["standard", "scaling", "sigmoid", "sentinel"],
+        help="Normalization method, see README for details.",
     )
     parser.add_argument(
-        "--debug", help="Enable server debugging", type=bool, default=False
+        "--debug", help="Enable server Flask debugging.", type=bool, default=False
     )
     parser.add_argument(
         "--root",
-        help="Root directory to serve templates/static from",
+        help="Root directory to serve templates/static from.",
         type=str,
         default="",
     )
     parser.add_argument(
-        "--num_items", help="Show this many images", type=int, default=100
+        "--num_items", help="Maximum images to show on the page.", type=int, default=100
     )
 
     args = parser.parse_args()
@@ -150,7 +155,7 @@ def index():
 
 
 def main():
-    logger.info("Starting server on http://%s:%s" % (args.bind, args.port))
+    logger.info("Starting image_tiles server on http://%s:%s" % (args.bind, args.port))
     app.run(host=args.bind, port=args.port, debug=args.debug, use_reloader=False)
 
 
