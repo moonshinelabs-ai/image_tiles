@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "image_tiles"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     {name = "Nate Harada", email = "image_tiles@moonshinelabs.ai"},
 ]
