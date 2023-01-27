@@ -13,7 +13,7 @@ from .glob import glob
 from .image import get_supported_extensions, read_image
 
 
-def parse_args():
+def parse_image_tile_args():
     parser = argparse.ArgumentParser(
         description="Simple server visualizes images in a folder."
     )
@@ -61,15 +61,6 @@ def parse_args():
     return args
 
 
-args = parse_args()
-root = os.path.join(os.getcwd(), args.root) if args.root else ""
-app = flask.Flask(
-    __name__,
-    template_folder=os.path.join(root, "templates"),
-    static_folder=os.path.join(root, "static"),
-)
-
-
 def get_image_files(folder: str) -> list[str]:
     """Get a list of supported image files in a folder."""
     supported_extensions = get_supported_extensions()
@@ -90,7 +81,7 @@ def get_image_files(folder: str) -> list[str]:
     return imagelist
 
 
-def read_and_render_image(path: str) -> Optional[bytes]:
+def read_and_render_image(path: str, args: argparse.Namespace) -> Optional[bytes]:
     """Reads an image and converts it to a png for display in the web
     browser."""
     # Rewrite based on the input
@@ -121,41 +112,53 @@ def server_path(ext_path: str) -> str:
         return f"images/{ext_path[1:]}"
 
 
-@app.route("/images/<path:image_path>")
-def image(image_path):
-    full_path = f"/{image_path}"
-    data = read_and_render_image(full_path)
-
-    return flask.Response(data, mimetype="image/png")
-
-
-@app.route("/")
-def index():
-    url_args = flask.request.args
-
-    num_items = args.num_items
-    if "num_items" in url_args:
-        num_items = int(url_args["num_items"])
-
-    logger.info(f"Reading from folder {args.folder_path}")
-    filelist = get_image_files(args.folder_path)
-    random.shuffle(filelist)
-    filelist = filelist[0:num_items]
-    items = [server_path(f) for f in filelist]
-    logger.info(f"Request recieved, found {len(filelist)} items to display")
-
-    return flask.render_template(
-        "image_tiles.html",
-        folder_location=args.folder_path,
-        num_images=num_items,
-        items=items,
-        normalization=args.normalization,
-        render_method=args.render_method,
+def flask_app(args):
+    """Defines the flask app itself."""
+    root = os.path.join(os.getcwd(), args.root) if args.root else ""
+    app = flask.Flask(
+        __name__,
+        template_folder=os.path.join(root, "templates"),
+        static_folder=os.path.join(root, "static"),
     )
+
+    @app.route("/images/<path:image_path>")
+    def image(image_path):
+        full_path = f"/{image_path}"
+        data = read_and_render_image(full_path, args)
+
+        return flask.Response(data, mimetype="image/png")
+
+    @app.route("/")
+    def index():
+        url_args = flask.request.args
+
+        num_items = args.num_items
+        if "num_items" in url_args:
+            num_items = int(url_args["num_items"])
+
+        logger.info(f"Reading from folder {args.folder_path}")
+        filelist = get_image_files(args.folder_path)
+        random.shuffle(filelist)
+        filelist = filelist[0:num_items]
+        items = [server_path(f) for f in filelist]
+        logger.info(f"Request recieved, found {len(filelist)} items to display")
+
+        return flask.render_template(
+            "image_tiles.html",
+            folder_location=args.folder_path,
+            num_images=num_items,
+            items=items,
+            normalization=args.normalization,
+            render_method=args.render_method,
+        )
+
+    return app
 
 
 def image_tile_server():
+    args = parse_image_tile_args()
     logger.info("Starting image_tiles server on http://%s:%s" % (args.bind, args.port))
+    app = flask_app(args)
     app.run(host=args.bind, port=args.port, debug=args.debug, use_reloader=False)
 
 
