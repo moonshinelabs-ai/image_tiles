@@ -154,10 +154,10 @@ def index():
     )
 
 
-def main():
+def image_tile_server():
     logger.info("Starting image_tiles server on http://%s:%s" % (args.bind, args.port))
     app.run(host=args.bind, port=args.port, debug=args.debug, use_reloader=False)
 
 
 if __name__ == "__main__":
-    main()
+    image_tile_server()

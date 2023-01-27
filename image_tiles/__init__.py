@@ -1,1 +1,1 @@
-from .image_tiles_server import main
+from .image_tiles_server import image_tile_server
