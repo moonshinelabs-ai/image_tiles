@@ -18,7 +18,7 @@ classifiers = [
 keywords = ["image", "tiles", "visualize"]
 license = {text = "MIT"}
 dependencies = [
-    "flask==2.2.2",
+    "flask==3.0.2",
     "numpy==1.24.1",
     "loguru==0.6.0",
     "imageio==2.24.0",
