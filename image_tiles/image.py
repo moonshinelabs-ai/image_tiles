@@ -1,11 +1,11 @@
 """Provides image utility functions."""
+
 import io
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 import imageio
 import numpy as np
 import tifffile
-from loguru import logger
 from PIL import Image
 from smart_open import open
 
@@ -24,7 +24,7 @@ def _render_image_data(data: np.ndarray, render_method: str) -> np.ndarray:
         data = np.expand_dims(data, -1)
     elif data.shape[2] >= 3:
         if render_method == "rgb":
-            # For RGB data, we'll take the first 3 channels (and ignore a possible alpha channel)
+            # For RGB data, take the first 3 channels (ignore alpha)
             data = data[:, :, 0:3]
         elif render_method == "bgr":
             # For BGR data, we'll do the same as above but also invert the axes
@@ -103,7 +103,7 @@ def read_image(
     # Read our image and render it into RGB for the webpage
     with open(path, "rb") as f:
         file_bytes = io.BytesIO(f.read())
-        data = reader(file_bytes)
+        data = np.asarray(reader(file_bytes))
         rendered_data = _render_image_data(data, render_method=render_method)
 
         if normalize is not None:

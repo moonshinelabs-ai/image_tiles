@@ -1,8 +1,10 @@
 """Provides normalization functions for images in np.array format."""
+
 from functools import partial
-from typing import Callable, Literal, Union
+from typing import Callable, Literal
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 
 def _format_array(image: np.ndarray, batch_operation: str, channel_operation: str):
@@ -152,8 +154,8 @@ def sentinel_truecolor_image(image: np.ndarray, normalizer: int = 2000) -> np.nd
 
 def invert_mean_std_normalization(
     image: np.ndarray,
-    mean: np.ndarray,
-    std: np.ndarray,
+    mean: ArrayLike,
+    std: ArrayLike,
     channels: Literal["last", "first"] = "last",
 ) -> np.ndarray:
     """Invert an image normalized by a set mean and standard deviation. The

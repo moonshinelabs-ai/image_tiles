@@ -67,7 +67,7 @@ def get_image_files(folder: str) -> list[str]:
 
     # We grab the filelist once and then test if a file is valid. This
     # costs more memory but the cost of a large glob in the cloud is high.
-    path = os.path.join(folder, f"*")
+    path = os.path.join(folder, "*")
     logger.info("Globbing files, this may take a while for a large AWS/GCP bucket...")
     filelist = glob(path)
 

@@ -21,7 +21,8 @@ def _aws_glob(path: str) -> list:
         import boto3
     except ImportError:
         logger.error(
-            "Didn't find AWS dependencies, try installing image_tiles[aws] if you haven't already."
+            "Didn't find AWS dependencies, "
+            "try installing image_tiles[aws] if you haven't already."
         )
         return []
 

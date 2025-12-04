@@ -19,7 +19,7 @@ keywords = ["image", "tiles", "visualize"]
 license = {text = "MIT"}
 dependencies = [
     "flask==3.0.2",
-    "numpy==1.24.1",
+    "numpy>=1.26.0",
     "loguru==0.6.0",
     "imageio==2.24.0",
     "tifffile==2022.10.10",
@@ -27,10 +27,17 @@ dependencies = [
 ]
 [project.optional-dependencies]
 aws = [
-    "boto3==1.26.54",
-    "smart_open[aws]==6.3.0",
+    "boto3>=1.26.54",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "moto[s3]==4.1",
+    "parameterized==0.8.1",
+    "ruff>=0.8.0",
+    "ty>=0.0.1a7",
+]
 
 [project.urls]
 Homepage = "https://github.com/moonshinelabs/image_tiles"
@@ -38,5 +45,38 @@ Homepage = "https://github.com/moonshinelabs/image_tiles"
 [project.scripts]
 image_tiles = "image_tiles:image_tile_server"
 
-[tool.isort]
-profile = "black"
+# Ruff configuration (replaces Black + isort)
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py312"
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "W",   # pycodestyle warnings
+]
+
+[tool.ruff.lint.isort]
+force-single-line = false
+force-sort-within-sections = false
+known-first-party = ["image_tiles"]
+
+# ty configuration (replaces mypy)
+[tool.ty.environment]
+python-version = "3.12"

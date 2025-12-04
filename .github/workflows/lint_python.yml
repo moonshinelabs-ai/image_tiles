@@ -3,16 +3,27 @@ name: Lint
 on: [push, pull_request]
 
 jobs:
-  lintcheck:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v3
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: "3.12"
-      - uses: psf/black@stable
-      - name: Install mypy
-        run: pip install mypy
-      - name: Run mypy
-        run: mypy --ignore-missing-imports $(git ls-files '*.py')
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Check formatting with Ruff
+        run: uv run ruff format --check .
+
+      - name: Lint with Ruff
+        run: uv run ruff check --output-format=github .
+
+      - name: Type check with ty
+        run: uv run ty check

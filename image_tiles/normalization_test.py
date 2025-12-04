@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-from parameterized import parameterized
 
 from .normalization import (
     invert_mean_std_normalization,

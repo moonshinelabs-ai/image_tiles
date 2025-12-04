@@ -12,7 +12,8 @@ def _aws_exists(path: str) -> bool:
         from botocore.exceptions import ClientError  # pants: no-infer-dep
     except ImportError:
         logger.error(
-            "Didn't find AWS dependencies, try installing image_tiles[aws] if you haven't already."
+            "Didn't find AWS dependencies, "
+            "try installing image_tiles[aws] if you haven't already."
         )
         return False
 
