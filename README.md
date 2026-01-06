@@ -9,7 +9,7 @@ Features:
 
 - Run one command and serve a folder of images in any format PIL supports.
 - Easily view images on another computer, such as when working via SSH or remotely.
-- Support for AWS (and eventually GCS/Azure) buckets.
+- Support for AWS S3 and Google Cloud Storage buckets.
 - Normalization and rendering options for a variety of multispectral images, especially
   satellites.
 - Support for multichannel TIFF, JP2, and other less common file formats.
@@ -19,18 +19,49 @@ Run `uvx image_tiles /path/to/folder`
 
 ## Installation
 
-```
+```bash
 # Install default installation
 $ pip install image_tiles
 
-# Install with S3 support
+# Install with AWS S3 support
 $ pip install image_tiles[aws]
+
+# Install with Google Cloud Storage support
+$ pip install image_tiles[gcp]
+
+# Install with all cloud backends
+$ pip install image_tiles[all]
+```
+
+### Using uvx
+
+You can also run image_tiles directly with `uvx` without installing:
+
+```bash
+# Run with default installation
+$ uvx image_tiles /path/to/folder
+
+# Run with AWS S3 support
+$ uvx --with 'image_tiles[aws]' image_tiles s3://my-bucket/images/
+
+# Run with Google Cloud Storage support
+$ uvx --with 'image_tiles[gcp]' image_tiles gs://my-bucket/images/
+
+# Run with all cloud backends
+$ uvx --with 'image_tiles[all]' image_tiles /path/to/folder
 ```
 
 ## Usage
 
-```
+```bash
+# Serve local images
 $ image_tiles ./path_to_folder
+
+# Serve images from AWS S3
+$ image_tiles s3://my-bucket/images/
+
+# Serve images from Google Cloud Storage
+$ image_tiles gs://my-bucket/images/
 ```
 
 ### Serving a folder of JPEGs (images from instagram.com/dustinlefevre)

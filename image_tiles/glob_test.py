@@ -1,11 +1,12 @@
 import unittest
 from typing import Sequence
+from unittest import mock
 
 import boto3
 import moto
 from parameterized import parameterized
 
-from .glob import _aws_glob, _filter_sequences
+from .glob import _aws_glob, _filter_sequences, _gcs_glob
 
 
 def index_from_lists(a: Sequence, b: Sequence) -> Sequence:
@@ -83,6 +84,68 @@ class TestGlob(unittest.TestCase):
                 s3.put_object(Bucket=bucket_name, Key=filename, Body="nodata")
 
             results = _aws_glob(pattern)
+            indexes = index_from_lists(results, files)
+            self.assertEqual(indexes, result_indexes)
+
+
+class MockBlob:
+    """Mock GCS blob object."""
+
+    def __init__(self, name: str):
+        self.name = name
+
+
+def _setup_gcs_mock(mock_blobs):
+    """Set up GCS mock modules and return the storage mock."""
+    mock_storage = mock.MagicMock()
+    mock_client = mock.MagicMock()
+    mock_bucket = mock.MagicMock()
+    mock_bucket.list_blobs.return_value = mock_blobs
+    mock_client.bucket.return_value = mock_bucket
+    mock_storage.Client.return_value = mock_client
+
+    mock_google_cloud = mock.MagicMock()
+    mock_google_cloud.storage = mock_storage
+
+    return {
+        "google": mock.MagicMock(),
+        "google.cloud": mock_google_cloud,
+        "google.cloud.storage": mock_storage,
+    }
+
+
+class TestGcsGlob(unittest.TestCase):
+    def test_gcs_empty_glob(self):
+        modules = _setup_gcs_mock([])
+        with mock.patch.dict("sys.modules", modules):
+            results = _gcs_glob("gs://path/*.png")
+            self.assertEqual(results, [])
+
+    @parameterized.expand(
+        [
+            ("gs://path/*.png", [0, 1, 2, 3]),
+            ("gs://path/*.jpg", [4, 5]),
+            ("gs://path/*.txt", [6]),
+            ("gs://path/cat*.png", [1, 3]),
+            ("gs://path/cat*", [1, 3, 5, 6]),
+        ]
+    )
+    def test_gcs_glob(self, pattern, result_indexes):
+        files = (
+            "gs://path/001.png",
+            "gs://path/cat.png",
+            "gs://path/dog.png",
+            "gs://path/catdog.png",
+            "gs://path/dog.jpg",
+            "gs://path/catdog.jpg",
+            "gs://path/catdog.txt",
+        )
+
+        mock_blobs = [MockBlob(f.replace("gs://path/", "")) for f in files]
+        modules = _setup_gcs_mock(mock_blobs)
+
+        with mock.patch.dict("sys.modules", modules):
+            results = _gcs_glob(pattern)
             indexes = index_from_lists(results, files)
             self.assertEqual(indexes, result_indexes)
 

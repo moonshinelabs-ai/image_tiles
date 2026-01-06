@@ -29,6 +29,13 @@ dependencies = [
 aws = [
     "boto3>=1.26.54",
 ]
+gcp = [
+    "google-cloud-storage>=2.0.0",
+]
+all = [
+    "boto3>=1.26.54",
+    "google-cloud-storage>=2.0.0",
+]
 
 [dependency-groups]
 dev = [
