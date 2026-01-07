@@ -107,7 +107,7 @@ def server_path(ext_path: str) -> str:
     if "s3://" in ext_path:
         return f"images/s3/{ext_path[5:]}"
     elif "gs://" in ext_path:
-        return f"images/{ext_path[3:]}"
+        return f"images/gs/{ext_path[5:]}"
     else:
         return f"images/{ext_path[1:]}"
 
