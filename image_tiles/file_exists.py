@@ -40,7 +40,34 @@ def _aws_exists(path: str) -> bool:
 
 def _gcs_exists(path: str) -> bool:
     """Test if a GCS file exists."""
-    raise NotImplementedError
+    try:
+        from google.cloud.exceptions import NotFound  # type: ignore[unresolved-import]
+    except ImportError:
+        logger.error(
+            "Didn't find GCP dependencies, "
+            "try installing image_tiles[gcp] if you haven't already."
+        )
+        return False
+
+    file_exists = False
+
+    # Check for individual files.
+    try:
+        with open(path):
+            file_exists = True
+    except OSError:
+        pass
+
+    # Check for "folder", which means that folder has items
+    # since GCS cannot have empty folders.
+    try:
+        items = glob(os.path.join(path, "*"))
+        if items:
+            file_exists = True
+    except NotFound:
+        pass
+
+    return file_exists
 
 
 def _local_exists(path: str) -> bool:

@@ -55,7 +55,35 @@ def _aws_glob(path: str) -> list:
 
 def _gcs_glob(path: str) -> list:
     """Implementation of GCS glob."""
-    raise NotImplementedError
+    try:
+        from google.cloud import storage  # type: ignore[unresolved-import]
+    except ImportError:
+        logger.error(
+            "Didn't find GCP dependencies, "
+            "try installing image_tiles[gcp] if you haven't already."
+        )
+        return []
+
+    # Do a bunch of surgery on the path to get the components
+    full_path, _ = os.path.split(path)
+    _, _, bucket_name, *remaining = full_path.split("/")
+    prefix = "/".join(remaining)
+
+    # For wildcard folder globs (i.e. /path/to/**/*.jpg) we need to do a
+    # bit more processing.
+    prefix = prefix.replace("/**", "")
+
+    # List all the objects in the path
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blobs = bucket.list_blobs(prefix=prefix)
+
+    filenames = []
+    for blob in blobs:
+        filenames.append(f"gs://{bucket_name}/{blob.name}")
+
+    # Do glob filtering
+    return _filter_sequences(path, filenames)
 
 
 def _local_glob(path: str) -> list:

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "image_tiles"
-version = "0.1.2"
+version = "0.1.5"
 authors = [
     {name = "Nate Harada", email = "image_tiles@moonshinelabs.ai"},
 ]
@@ -28,6 +28,13 @@ dependencies = [
 [project.optional-dependencies]
 aws = [
     "boto3>=1.26.54",
+]
+gcp = [
+    "google-cloud-storage>=2.0.0",
+]
+all = [
+    "boto3>=1.26.54",
+    "google-cloud-storage>=2.0.0",
 ]
 
 [dependency-groups]
